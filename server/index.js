@@ -29,32 +29,31 @@ app.use(
 	})
 )
 app.use(passport.initialize())
-app.use(passport.session()) 
+app.use(passport.session())
 
 console.log(process.env.DB_HOST);
 
 if (process.env.NODE_ENV === 'production') {
-	
+
 	console.log('running in production')
-	// app.use(express.static(path.join(__dirname, '../client/build')));
+	app.use(express.static(path.join(__dirname, '/../client/build')));
+	console.log(path.join(__dirname, '/../client/build'));
 
 }
 
 app.use('/auth', require('./auth'))
 
-app.use(function(err, req, res, next) {
-	console.log('err => ')
-	console.error(err.stack)
-	res.status(500)
-})
+
 
 app.get('*', (req, res) => {
-	res.sendFile(path.join(__dirname+'../client/build/index.html'));
-	if (err) {
-		res.status(500).send(err)
-	  }
-  });
-  
+	res.sendFile(path.join(__dirname + '/../client/build/index.html'), function (err) {
+		if (err) {
+			res.status(500).send(err)
+		}
+	});
+});
+
+
 
 app.listen(PORT, () => {
 	console.log(`App listening on PORT: ${PORT}`)

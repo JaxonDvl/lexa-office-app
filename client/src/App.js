@@ -61,7 +61,7 @@ class App extends Component {
 		this._login = this._login.bind(this)
 	}
 	componentDidMount() {
-		axios.get('/auth/user').then(response => {
+		axios.get('/user/getUser').then(response => {
 			console.log(response.data)
 			if (!!response.data.user) {
 				console.log('THERE IS A USER')
@@ -81,7 +81,7 @@ class App extends Component {
 	_logout(event) {
 		event.preventDefault()
 		console.log('logging out')
-		axios.post('/auth/logout').then(response => {
+		axios.post('/user/logout').then(response => {
 			console.log(response.data)
 			if (response.status === 200) {
 				this.setState({
@@ -94,7 +94,7 @@ class App extends Component {
 
 	_login(username, password) {
 		axios
-			.post('/auth/login', {
+			.post('/user/login', {
 				username,
 				password
 			})

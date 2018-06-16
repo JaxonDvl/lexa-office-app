@@ -4,7 +4,6 @@ const Device = require('../db/models/device')
 const jwtAuth = (socket, data) => {
     return new Promise((resolve, reject) => {
         let token = data && data.token || null;
-        console.log(data.token);
         if (!socket || socket === 'undefined' || !clients[socket.id] || !token) {
             console.log('unauthorized access');
             message.sendError(socket, 'Invalid token')
@@ -75,7 +74,7 @@ const loginDevice = function loginDevice(socket, device) {
 
     let data = { profile: profile, token: token };
     socket.emit('login.success', data);
-
+    socket.uuid = profile.uuid;
     clients[socket.id] = socket;
     console.log('Device logged to socket.io. number of authorized connections:', NumberOfConnections());
     console.log('Device profile logged to socket.io=', profile);

@@ -5,12 +5,12 @@ class Home extends Component {
 		super()
 	}
 
-	handleSendRequest = () =>{
+	handleSendRequest = () => {
 		console.log("sending request");
 		axios.get('/device/deviceInfo')
-		.then(response => {
-			console.log(response);
-		})
+			.then(response => {
+				console.log(response);
+			})
 	}
 
 	render() {

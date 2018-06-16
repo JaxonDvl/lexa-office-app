@@ -1,61 +1,21 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import { Route, Link } from 'react-router-dom'
+import { Route, Link, Switch } from 'react-router-dom'
 import './App.css'
 import LoginForm from './components/Login/LoginForm'
 import SignupForm from './components/SignupForm'
 import Header from './components/Header'
 import Home from './components/Home'
-
-const DisplayLinks = props => {
-	if (props.loggedIn) {
-		return (
-			<nav className="navbar">
-				<ul className="nav">
-					<li className="nav-item">
-						<Link to="/" className="nav-link">
-							Home
-						</Link>
-					</li>
-					<li>
-						<Link to="#" className="nav-link" onClick={props._logout}>
-							Logout
-						</Link>
-					</li>
-				</ul>
-			</nav>
-		)
-	} else {
-		return (
-			<nav className="navbar">
-				<ul className="nav">
-					<li className="nav-item">
-						<Link to="/" className="nav-link">
-							Home
-						</Link>
-					</li>
-					<li className="nav-item">
-						<Link to="/login" className="nav-link">
-							login
-						</Link>
-					</li>
-					<li className="nav-item">
-						<Link to="/signup" className="nav-link">
-							sign up
-						</Link>
-					</li>
-				</ul>
-			</nav>
-		)
-	}
-}
-
+import Navigation from './Navigation'
+import Report from './components/Report';
+import PrivateRoute from './components/PrivateRoute';
 class App extends Component {
 	constructor() {
 		super()
 		this.state = {
 			loggedIn: false,
-			user: null
+			user: null,
+			loading: true,
 		}
 		this._logout = this._logout.bind(this)
 		this._login = this._login.bind(this)
@@ -67,12 +27,14 @@ class App extends Component {
 				console.log('THERE IS A USER')
 				this.setState({
 					loggedIn: true,
-					user: response.data.user
+					user: response.data.user,
+					loading: false,
 				})
 			} else {
 				this.setState({
 					loggedIn: false,
-					user: null
+					user: null,
+					loading: false
 				})
 			}
 		})
@@ -111,26 +73,18 @@ class App extends Component {
 	}
 
 	render() {
+		if(this.state.loading){
+			return (<div></div>)
+		}
 		return (
 			<div className="App">
-				<h1>This is the main App component</h1>
-				<Header user={this.state.user} />
-				{/* LINKS to our different 'pages' */}
-				<DisplayLinks _logout={this._logout} loggedIn={this.state.loggedIn} />
-				{/*  ROUTES */}
-				{/* <Route exact path="/" component={Home} /> */}
+				<Navigation _logout={this._logout} loggedIn={this.state.loggedIn} />
+				<Switch>
 				<Route exact path="/" render={() => <Home user={this.state.user} />} />
-				<Route
-					exact
-					path="/login"
-					render={() =>
-						<LoginForm
-							_login={this._login}
-							_googleSignin={this._googleSignin}
-						/>}
-				/>
-				<Route exact path="/signup" component={SignupForm} />
-				{/* <LoginForm _login={this._login} /> */}
+				<Route exact path="/login" render={() => <LoginForm _login={this._login} />}/>
+				<PrivateRoute authenticated={this.state.loggedIn} exact path="/signup" component={SignupForm} />
+				<PrivateRoute authenticated={this.state.loggedIn} path="/reports" component={Report} />
+				</Switch>
 			</div>
 		)
 	}

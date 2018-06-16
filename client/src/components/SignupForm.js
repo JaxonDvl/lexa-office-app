@@ -21,16 +21,14 @@ class SignupForm extends Component {
 	}
 	handleSubmit(event) {
 		event.preventDefault()
-		// TODO - validate!
 		axios
-			.post('/auth/signup', {
+			.post('/user/signup', {
 				username: this.state.username,
 				password: this.state.password
 			})
 			.then(response => {
 				console.log(response)
 				if (!response.data.errmsg) {
-					console.log('youre good')
 					this.setState({
 						redirectTo: '/login'
 					})
@@ -44,30 +42,43 @@ class SignupForm extends Component {
 			return <Redirect to={{ pathname: this.state.redirectTo }} />
 		}
 		return (
-			<div className="SignupForm">
+			<div className="sign-up-form">
 				<h1>Signup form</h1>
-				<label htmlFor="username">Username: </label>
-				<input
-					type="text"
-					name="username"
-					value={this.state.username}
-					onChange={this.handleChange}
-				/>
-				<label htmlFor="password">Password: </label>
-				<input
-					type="password"
-					name="password"
-					value={this.state.password}
-					onChange={this.handleChange}
-				/>
-				<label htmlFor="confirmPassword">Confirm Password: </label>
-				<input
-					type="password"
-					name="confirmPassword"
-					value={this.state.confirmPassword}
-					onChange={this.handleChange}
-				/>
-				<button onClick={this.handleSubmit}>Sign up</button>
+				<form>
+					<div className="form-group">
+						<label htmlFor="username">Username: </label>
+						<input
+							type="text"
+							name="username"
+							className="form-control"
+							value={this.state.username}
+							onChange={this.handleChange}
+						/>
+					</div>
+					<div className="form-group">
+						<label htmlFor="password">Password: </label>
+						<input
+							type="password"
+							name="password"
+							className="form-control"
+							value={this.state.password}
+							onChange={this.handleChange}
+						/>
+					</div>
+					<div className="form-group">
+
+						<label htmlFor="confirmPassword">Confirm Password: </label>
+						<input
+							type="password"
+							name="confirmPassword"
+							className="form-control"
+							value={this.state.confirmPassword}
+							onChange={this.handleChange}
+						/>
+					</div>
+					{/* </ul> */}
+					<button className="btn btn-primary" onClick={this.handleSubmit}>Register</button>
+				</form>
 			</div>
 		)
 	}

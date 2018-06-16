@@ -52,7 +52,10 @@ app.use('/user', require('./router/user'))
 
 app.use('/device', auth.isLoggedIn, require('./router/device'))
 
-
+app.get('/cloud',(req,res)=>{
+	message.cloudMessage({message: "test cloud call"})
+	return res.status(200).json({message:"cloud call"})
+})
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname + '/../client/build/index.html'), function (err) {
 		if (err) {
@@ -64,6 +67,7 @@ app.get('*', (req, res) => {
 const server = http.Server(app);
 
 require('./modules/socketToken').connect(server);
+
 
 
 

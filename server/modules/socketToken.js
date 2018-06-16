@@ -18,7 +18,6 @@ exports.connect =  function(server) {
         console.log("socket has a new connection:",socket.id);
         socket.on('getDevice', function(data){
             console.log("called getDevice()");
-            console.log(data);
             deviceManager.getDevice(socket,data);
         })
 
@@ -29,7 +28,6 @@ exports.connect =  function(server) {
 
         socket.on('login', function(data){
             console.log("called authDevice()");
-            console.log(data);
             auth.authenticateDevice(socket,data);
 
         })

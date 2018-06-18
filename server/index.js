@@ -52,10 +52,8 @@ app.use('/user', require('./router/user'))
 
 app.use('/device', auth.isLoggedIn, require('./router/device'))
 
-app.get('/cloud',(req,res)=>{
-	message.cloudMessage({message: "test cloud call"})
-	return res.status(200).json({message:"cloud call"})
-})
+app.use('/cloud', require('./router/cloud'));
+
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname + '/../client/build/index.html'), function (err) {
 		if (err) {

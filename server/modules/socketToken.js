@@ -26,16 +26,27 @@ exports.connect =  function(server) {
             message.broadcast(socket,data);
         })
 
+        socket.on('login-web', function(data){
+            console.log("called authDevice()");
+            auth.authenticateWebClient(socket,data);
+
+        })
+
+        socket.on('data-tag', function(data){
+            console.log(data);
+        })
+
         socket.on('login', function(data){
             console.log("called authDevice()");
             auth.authenticateDevice(socket,data);
 
-        })
+        }) 
 
         socket.on('logout',function(token){
             clients[socket.id] && delete clients[socket.id];
             console.log("closed by the client request: ", NumberOfConnections());
         });
+
 
         socket.on('disconnect',function(token){
             clients[socket.id] && delete clients[socket.id];

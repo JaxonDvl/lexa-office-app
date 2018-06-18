@@ -62,6 +62,14 @@ exports.authenticateDevice = function authenticateDevice(socket, data) {
 
 };
 
+exports.authenticateWebClient = function authenticateWebClient(socket, data) {
+    socket.emit('login-client.success', {message:"connected WebClient"});
+    clients[socket.id] = socket;
+    console.log('Device logged to socket.io. number of authorized connections:', NumberOfConnections());
+    console.log('WebClient connected to  socket.io=', socket.id);
+
+};
+
 
 const loginDevice = function loginDevice(socket, device) {
     let profile = {

@@ -13,11 +13,19 @@ class SignupForm extends Component {
 		}
 		this.handleSubmit = this.handleSubmit.bind(this)
 		this.handleChange = this.handleChange.bind(this)
+		this.handleTagId = this.handleTagId.bind(this)
 	}
 	handleChange(event) {
 		this.setState({
 			[event.target.name]: event.target.value
 		})
+	}
+	handleTagId() {
+		let event = {}
+		event.target = {}
+		event.target.name = "tagId";
+		event.target.value = "99823"
+		this.handleChange(event);
 	}
 	handleSubmit(event) {
 		event.preventDefault()
@@ -76,7 +84,17 @@ class SignupForm extends Component {
 							onChange={this.handleChange}
 						/>
 					</div>
-					{/* </ul> */}
+					<div className="form-group">
+						<label htmlFor="tag">TAG ID: </label>
+						<input
+							type="text"
+							disabled="disabled"
+							name="tag"
+							className="form-control"
+							value={this.state.tagId}
+							onChange={this.handleChange}
+						/>
+					</div>
 					<button className="btn btn-primary" onClick={this.handleSubmit}>Register</button>
 				</form>
 			</div>

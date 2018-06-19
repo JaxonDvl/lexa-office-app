@@ -9,6 +9,9 @@ import Home from './components/Home'
 import Navigation from './Navigation'
 import Report from './components/Report';
 import PrivateRoute from './components/PrivateRoute';
+
+import {serverUrl} from './helpers/constants';
+import socketClient from "socket.io-client";
 class App extends Component {
 	constructor() {
 		super()
@@ -16,19 +19,32 @@ class App extends Component {
 			loggedIn: false,
 			user: null,
 			loading: true,
+			socket : null,
+			serverUrl : serverUrl
 		}
 		this._logout = this._logout.bind(this)
 		this._login = this._login.bind(this)
 	}
 	componentDidMount() {
 		axios.get('/user/getUser').then(response => {
+			let { serverUrl, socket } = this.state;
+
 			console.log(response.data)
 			if (!!response.data.user) {
-				console.log('THERE IS A USER')
+				if(!socket){
+					socket = socketClient(serverUrl);
+					socket.clientConnUser = response.data.user.username;
+					socket.emit('login-web', {username:socket.clientConnUser});
+					console.log('User logged in');
+					socket.on('login-client.success', function(data){
+						console.log(data);
+					})
+				}
 				this.setState({
 					loggedIn: true,
 					user: response.data.user,
 					loading: false,
+					socket
 				})
 			} else {
 				this.setState({
@@ -39,6 +55,10 @@ class App extends Component {
 			}
 		})
 	}
+	componentWillUnmount() {
+		console.log("called unmount");
+		this.state.socket.emit("logout");
+	  }
 
 	_logout(event) {
 		event.preventDefault()
@@ -46,15 +66,18 @@ class App extends Component {
 		axios.post('/user/logout').then(response => {
 			console.log(response.data)
 			if (response.status === 200) {
+				this.state.socket.emit("logout");
 				this.setState({
 					loggedIn: false,
-					user: null
+					user: null,
+					socket:null
 				})
 			}
 		})
 	}
 
 	_login(username, password) {
+		let { serverUrl, socket } = this.state;
 		axios
 			.post('/user/login', {
 				username,
@@ -64,9 +87,19 @@ class App extends Component {
 				console.log(response)
 				if (response.status === 200) {
 					// update the state
+					if(!socket){
+						socket = socketClient(serverUrl);
+						socket.clientConnUser = response.data.user.username;
+						socket.emit('login-web', {username:socket.clientConnUser});
+						console.log('User logged in');
+						socket.on('login-client.success', function(data){
+							console.log(data);
+						})
+					}
 					this.setState({
 						loggedIn: true,
-						user: response.data.user
+						user: response.data.user,
+						socket
 					})
 				}
 			})
@@ -82,8 +115,8 @@ class App extends Component {
 				<Switch>
 				<Route exact path="/" render={() => <Home user={this.state.user} />} />
 				<Route exact path="/login" render={() => <LoginForm _login={this._login} />}/>
-				<PrivateRoute authenticated={this.state.loggedIn} exact path="/signup" component={SignupForm} />
-				<PrivateRoute authenticated={this.state.loggedIn} path="/reports" component={Report} />
+				<PrivateRoute authenticated={this.state.loggedIn} exact socket={this.state.socket} path="/signup" component={SignupForm} />
+				<PrivateRoute   authenticated={this.state.loggedIn} exact socket={this.state.socket} user={this.state.user} path="/reports" component={Report} />
 				</Switch>
 			</div>
 		)

@@ -50,9 +50,10 @@ app.get('/auth/checkAuthState', auth.isLoggedIn, (req,res) =>{
 })
 app.use('/user', require('./router/user'))
 
-app.use('/device', auth.isLoggedIn, require('./router/device'))
+app.use('/device',  require('./router/device'))
 
 app.use('/cloud', require('./router/cloud'));
+app.use('/logs', require('./router/logs'));
 
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname + '/../client/build/index.html'), function (err) {

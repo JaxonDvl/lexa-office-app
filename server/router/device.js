@@ -1,52 +1,20 @@
 const express = require('express')
 const router = express.Router()
 const Device = require('../db/models/device')
-// const passport = require('../passport')
 
 router.get('/deviceInfo', (req,res,next) => {
-    console.log("request device data")
-    return res.json({deviceInfo: "some info"})
+	let deviceId = req.query.deviceId;
+	Device.findOne({ 'uuid': deviceId }, "clocking deviceName uuid", (err, deviceMatch) => {
+		if(deviceMatch) {
+			return res.json(deviceMatch)
+		} else {
+			return res.json({message: "No device found"})
+		}
+	})
+
+   
 });
-// GET basic info for the user
-// router.get('/user', (req, res, next) => {
-// 	console.log('===== user!!======')
-// 	console.log(req.user)
-// 	if (req.user) {
-// 		return res.json({ user: req.user })
-// 	} else {
-// 		return res.json({ user: null })
-// 	}
-// })
 
-// router.post(
-// 	'/login',
-// 	function (req, res, next) {
-// 		console.log(req.body)
-// 		console.log('================')
-// 		next()
-// 	},
-// 	passport.authenticate('local'),
-// 	(req, res) => {
-// 		console.log('POST to /login')
-// 		const user = JSON.parse(JSON.stringify(req.user)) // hack
-// 		const cleanUser = Object.assign({}, user)
-// 		if (cleanUser.local) {
-// 			console.log(`Deleting ${cleanUser.local.password}`)
-// 			delete cleanUser.local.password
-// 		}
-// 		res.json({ user: cleanUser })
-// 	}
-// )
-
-// router.post('/logout', (req, res) => {
-// 	if (req.user) {
-// 		req.session.destroy()
-// 		res.clearCookie('connect.sid') // clean up!
-// 		return res.json({ msg: 'logging you out' })
-// 	} else {
-// 		return res.json({ msg: 'no user to log out!' })
-// 	}
-// })
 
 router.post('/registerDevice', (req, res) => {
 	const { uuid, deviceName, password } = req.body

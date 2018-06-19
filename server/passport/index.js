@@ -9,7 +9,7 @@ passport.serializeUser((user, done) => {
 
 passport.deserializeUser((id, done) => {
 	User.findOne(
-		{ _id: id }, 'local.username', (err, user) => {
+		{ _id: id }, 'username firstName lastName', (err, user) => {
 			console.log('deserialize :', user)
 			done(null, user)
 		});

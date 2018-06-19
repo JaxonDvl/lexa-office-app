@@ -1,5 +1,5 @@
 const _ = require('lodash');
- 
+const Device = require('../db/models/device')
 exports.broadcast = function (socket, data) {
     auth.verifyConnection(socket, data).then(function (result) {
         console.log('Access allowed to broadcast()');
@@ -35,6 +35,51 @@ exports.cloudMessageTemperature = function (data) {
             }
         })
     })
+}
+
+exports.changeClockState = function(data){
+    console.log(data);
+    return new Promise(function(resolve,reject){
+        var obj = { state: data.state };
+        let selectedClient = _.find(clients, {uuid: "AX1"});
+        if(!selectedClient) {
+            reject(new Error("Could not find client."))
+        }
+        selectedClient.emit('change-clocking', obj, function(dataAck){
+            if(dataAck) {
+                let selectedClients = _.filter(clients, (obj) => _.has(obj,'username')) || [];
+                if(selectedClients.length){
+                    _.each(selectedClients, (client)=>{
+                        client.emit('clocking-update', dataAck)
+                    })
+            
+                }
+                Device.update({ uuid: "AX1" }, { $set: { clocking: dataAck.clocking }}, function (err, device){
+                    if(err) {
+                        console.log(err);
+                    }
+                });
+                resolve(dataAck)
+            } else {
+                reject(new Error("Something went wrong on socket: "+ selectedClient.uuid))
+            }
+        })
+    })
+}
+
+
+exports.broadcastTagToWebClients = function (data) {
+    console.log("data to be send", data);
+    let selectedClients = _.filter(clients, (obj) => _.has(obj,'username')) || [];
+    if(selectedClients.length){
+        _.each(selectedClients, (client)=>{
+            client.emit('tag-register', data)
+        })
+
+    } else {
+
+    }
+
 }
 
 exports.cloudMessageHumidity = function (data) {

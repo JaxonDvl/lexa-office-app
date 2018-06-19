@@ -20,11 +20,11 @@ class Home extends Component {
 				<div className="Home">
 					<p>Current User:</p>
 					<code>
-						{JSON.stringify(this.props)}
+						{JSON.stringify(  this.props.user)}
 					</code>
 				</div>
 				<div>
-					<button className="btn btn-primary" onClick={this.handleSendRequest}>Send Request</button>
+					<button className="btn btn-primary req-test" onClick={this.handleSendRequest}>Send Request</button>
 				</div>
 			</div>
 		)

@@ -67,6 +67,25 @@ exports.changeClockState = function(data){
     })
 }
 
+exports.updateBulb = function(data){
+    console.log(data);
+    return new Promise(function(resolve,reject){
+        var obj = { data };
+        let selectedClient = _.find(clients, {uuid: "AX0"});
+        if(!selectedClient) {
+            reject(new Error("Could not find client."))
+        }
+        selectedClient.emit('update-bulb', obj, function(dataAck){
+            if(dataAck) {
+                resolve(dataAck)
+            } else {
+                reject(new Error("Something went wrong on socket: "+ selectedClient.uuid))
+            }
+        })
+    })
+}
+
+
 
 exports.broadcastTagToWebClients = function (data) {
     console.log("data to be send", data);

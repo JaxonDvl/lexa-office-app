@@ -12,6 +12,7 @@ module.exports = {
               "PORT": 3667,
               "MONGODB_URI" : "mongodb://0.0.0.0:27017/testDb1",
               "NODE_ENV": "production",
+              "JWT_SECRET" : "QEWRYSUXSDJALKWEPUQ"
           }
         }
     ]

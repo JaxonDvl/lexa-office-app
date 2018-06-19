@@ -10,7 +10,7 @@ import Navigation from './Navigation'
 import Report from './components/Report';
 import PrivateRoute from './components/PrivateRoute';
 
-import {serverUrl} from './helpers/constants';
+import serverUrl from './helpers/constants';
 import socketClient from "socket.io-client";
 class App extends Component {
 	constructor() {

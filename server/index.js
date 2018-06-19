@@ -13,6 +13,9 @@ const passport = require('./passport')
 const app = express();
 const path = require('path')
 const PORT = process.env.PORT || 8080
+const http = require('http');
+
+
 app.use(morgan('dev'))
 app.use(
 	bodyParser.urlencoded({
@@ -20,6 +23,7 @@ app.use(
 	})
 )
 app.use(bodyParser.json())
+
 app.use(
 	session({
 		secret: process.env.APP_SECRET || 'default',
@@ -28,10 +32,9 @@ app.use(
 		saveUninitialized: false
 	})
 )
+
 app.use(passport.initialize())
 app.use(passport.session())
-
-console.log(process.env.DB_HOST);
 
 if (process.env.NODE_ENV === 'production') {
 
@@ -41,9 +44,16 @@ if (process.env.NODE_ENV === 'production') {
 
 }
 
-app.use('/auth', require('./auth'))
+const auth = require('./auth/auth');
+app.get('/auth/checkAuthState', auth.isLoggedIn, (req,res) =>{
+	return res.status(200).json({message:'OK'});
+})
+app.use('/user', require('./router/user'))
 
+app.use('/device',  require('./router/device'))
 
+app.use('/cloud', require('./router/cloud'));
+app.use('/logs', require('./router/logs'));
 
 app.get('*', (req, res) => {
 	res.sendFile(path.join(__dirname + '/../client/build/index.html'), function (err) {
@@ -53,8 +63,13 @@ app.get('*', (req, res) => {
 	});
 });
 
+const server = http.Server(app);
+
+require('./modules/socketToken').connect(server);
 
 
-app.listen(PORT, () => {
+
+
+server.listen(PORT, () => {
 	console.log(`App listening on PORT: ${PORT}`)
 })

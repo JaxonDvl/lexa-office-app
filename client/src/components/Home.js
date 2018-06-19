@@ -1,25 +1,36 @@
-import React from 'react'
+import React, { Component } from 'react'
+import axios from 'axios'
+class Home extends Component {
+	constructor() {
+		super()
+	}
 
-const Home = props => {
-	if (props.user) {
+	handleSendRequest = () => {
+		console.log("sending request");
+		axios.get('/device/deviceInfo')
+			.then(response => {
+				console.log(response);
+			})
+	}
+
+	render() {
 		return (
-			<div className="Home">
-				<p>Current User:</p>
-				<code>
-					{JSON.stringify(props)}
-				</code>
-			</div>
-		)
-	} else {
-		return (
-			<div className="Home">
-				<p>Current User:</p>
-				<code>
-					{JSON.stringify(props)}
-				</code>
+			<div>
+
+				<div className="Home">
+					<p>Current User:</p>
+					<code>
+						{JSON.stringify(  this.props.user)}
+					</code>
+				</div>
+				<div>
+					<button className="btn btn-primary req-test" onClick={this.handleSendRequest}>Send Request</button>
+				</div>
 			</div>
 		)
 	}
+
 }
+
 
 export default Home

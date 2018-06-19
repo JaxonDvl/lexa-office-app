@@ -1,100 +1,85 @@
 import React, { Component } from 'react'
 import axios from 'axios'
-import { Route, Link } from 'react-router-dom'
+import { Route, Link, Switch } from 'react-router-dom'
 import './App.css'
 import LoginForm from './components/Login/LoginForm'
 import SignupForm from './components/SignupForm'
 import Header from './components/Header'
 import Home from './components/Home'
+import Navigation from './Navigation'
+import Report from './components/Report';
+import PrivateRoute from './components/PrivateRoute';
 
-const DisplayLinks = props => {
-	if (props.loggedIn) {
-		return (
-			<nav className="navbar">
-				<ul className="nav">
-					<li className="nav-item">
-						<Link to="/" className="nav-link">
-							Home
-						</Link>
-					</li>
-					<li>
-						<Link to="#" className="nav-link" onClick={props._logout}>
-							Logout
-						</Link>
-					</li>
-				</ul>
-			</nav>
-		)
-	} else {
-		return (
-			<nav className="navbar">
-				<ul className="nav">
-					<li className="nav-item">
-						<Link to="/" className="nav-link">
-							Home
-						</Link>
-					</li>
-					<li className="nav-item">
-						<Link to="/login" className="nav-link">
-							login
-						</Link>
-					</li>
-					<li className="nav-item">
-						<Link to="/signup" className="nav-link">
-							sign up
-						</Link>
-					</li>
-				</ul>
-			</nav>
-		)
-	}
-}
-
+import {serverUrl} from './helpers/constants';
+import socketClient from "socket.io-client";
 class App extends Component {
 	constructor() {
 		super()
 		this.state = {
 			loggedIn: false,
-			user: null
+			user: null,
+			loading: true,
+			socket : null,
+			serverUrl : serverUrl
 		}
 		this._logout = this._logout.bind(this)
 		this._login = this._login.bind(this)
 	}
 	componentDidMount() {
-		axios.get('/auth/user').then(response => {
+		axios.get('/user/getUser').then(response => {
+			let { serverUrl, socket } = this.state;
+
 			console.log(response.data)
 			if (!!response.data.user) {
-				console.log('THERE IS A USER')
+				if(!socket){
+					socket = socketClient(serverUrl);
+					socket.clientConnUser = response.data.user.username;
+					socket.emit('login-web', {username:socket.clientConnUser});
+					console.log('User logged in');
+					socket.on('login-client.success', function(data){
+						console.log(data);
+					})
+				}
 				this.setState({
 					loggedIn: true,
-					user: response.data.user
+					user: response.data.user,
+					loading: false,
+					socket
 				})
 			} else {
 				this.setState({
 					loggedIn: false,
-					user: null
+					user: null,
+					loading: false
 				})
 			}
 		})
 	}
+	componentWillUnmount() {
+		console.log("called unmount");
+		this.state.socket.emit("logout");
+	  }
 
 	_logout(event) {
 		event.preventDefault()
 		console.log('logging out')
-		axios.post('/auth/logout').then(response => {
+		axios.post('/user/logout').then(response => {
 			console.log(response.data)
 			if (response.status === 200) {
+				this.state.socket.emit("logout");
 				this.setState({
 					loggedIn: false,
-					user: null
+					user: null,
+					socket:null
 				})
 			}
 		})
 	}
 
 	_login(username, password) {
+		let { serverUrl, socket } = this.state;
 		axios
-			.post('/auth/login', {
+			.post('/user/login', {
 				username,
 				password
 			})
@@ -102,35 +87,37 @@ class App extends Component {
 				console.log(response)
 				if (response.status === 200) {
 					// update the state
+					if(!socket){
+						socket = socketClient(serverUrl);
+						socket.clientConnUser = response.data.user.username;
+						socket.emit('login-web', {username:socket.clientConnUser});
+						console.log('User logged in');
+						socket.on('login-client.success', function(data){
+							console.log(data);
+						})
+					}
 					this.setState({
 						loggedIn: true,
-						user: response.data.user
+						user: response.data.user,
+						socket
 					})
 				}
 			})
 	}
 
 	render() {
+		if(this.state.loading){
+			return (<div></div>)
+		}
 		return (
 			<div className="App">
-				<h1>This is the main App component</h1>
-				<Header user={this.state.user} />
-				{/* LINKS to our different 'pages' */}
-				<DisplayLinks _logout={this._logout} loggedIn={this.state.loggedIn} />
-				{/*  ROUTES */}
-				{/* <Route exact path="/" component={Home} /> */}
+				<Navigation _logout={this._logout} loggedIn={this.state.loggedIn} />
+				<Switch>
 				<Route exact path="/" render={() => <Home user={this.state.user} />} />
-				<Route
-					exact
-					path="/login"
-					render={() =>
-						<LoginForm
-							_login={this._login}
-							_googleSignin={this._googleSignin}
-						/>}
-				/>
-				<Route exact path="/signup" component={SignupForm} />
-				{/* <LoginForm _login={this._login} /> */}
+				<Route exact path="/login" render={() => <LoginForm _login={this._login} />}/>
+				<PrivateRoute authenticated={this.state.loggedIn} exact socket={this.state.socket} path="/signup" component={SignupForm} />
+				<PrivateRoute   authenticated={this.state.loggedIn} exact socket={this.state.socket} user={this.state.user} path="/reports" component={Report} />
+				</Switch>
 			</div>
 		)
 	}

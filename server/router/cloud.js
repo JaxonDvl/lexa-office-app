@@ -59,4 +59,9 @@ router.get("/onlineUsers",(req,res)=>{
 			}
 		})
 })
+router.get("/countOnline",(req,res)=>{
+	User.find({ 'active': true }, "firstName lastName", (err, userList) => {
+		return res.json(userList.length);
+		})
+})
 module.exports = router;

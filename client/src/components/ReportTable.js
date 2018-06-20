@@ -3,13 +3,10 @@ import _ from 'lodash';
 const ReportTable = props => {
     let TableRows;
     let tableArray = props.logs;
-    console.log(tableArray);
-    // TableRows = _.
-    // })
-    // console.log(TableRows);
 
 return (
-    <table className="table table-hover">
+    <div class="container table-responsive">
+    <table className="table table-hover table-bordered mtable">
         <thead>
             <tr>
                 <th scope="col">#</th>
@@ -21,7 +18,6 @@ return (
         <tbody>
 
             {tableArray.map( (element, index) => {
-                console.log(index);
                 let rowColor = "table-primary";
                 if(element.state === 'Check Out'){
                     rowColor = "table-warning";
@@ -39,6 +35,7 @@ return (
 
             </tbody>
         </table>
+        </div>
         )
 }
     

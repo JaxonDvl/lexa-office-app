@@ -19,11 +19,17 @@ class Report extends Component {
 		let logs = await axios.get('/logs/getLogs')
 		let deviceInfo = await axios.get('/device/deviceInfo?deviceId=AX1')
 		console.log(deviceInfo.data);
+		socket.on('clocking-data-log', async (data) => {
+			let updatedLogs = await axios.get('/logs/getLogs')
+			this.setState({
+				logs: updatedLogs.data.logsMatch.reverse(),	
+			})
+		})
 		if(deviceInfo.data["clocking"]=== false) {
 			clockingMsg = "Clocking Mode OFF, Ask Alexa to turn it ON";
 			msgType = "danger";
 			this.setState({
-				logs: logs.data.logsMatch.reverse(),
+				logs: logs.data.logsMatch,
 				clockingMsg,
 				msgType
 			})
@@ -31,14 +37,12 @@ class Report extends Component {
 			clockingMsg = "Clocking Mode ON";
 			msgType : "success";
 			this.setState({
-				logs: logs.data.logsMatch.reverse(),
+				logs: logs.data.logsMatch,
 				clockingMsg,
 				msgType
 			})
 		}
-
 		socket.on('clocking-update', (data) => {
-			console.log(data);
 			if(data["clocking"]=== false) {
 				clockingMsg = "Clocking Mode OFF, Ask Alexa to turn it ON";
 				msgType = "danger";

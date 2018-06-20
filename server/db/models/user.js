@@ -9,7 +9,8 @@ const userSchema = new Schema({
 	lastName: { type: String, unique: false },
 	username: { type: String, unique: false, required: false },
 	password: { type: String, unique: false, required: false },
-	tagId: { type: String, unique: false, required: false }
+	tagId: { type: String, unique: false, required: false },
+	active: { type: Boolean, unique: false, required: false }
 
 })
 

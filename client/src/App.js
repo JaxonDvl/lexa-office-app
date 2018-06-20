@@ -37,7 +37,7 @@ class App extends Component {
 					socket.emit('login-web', {username:socket.clientConnUser});
 					console.log('User logged in');
 					socket.on('login-client.success', function(data){
-						console.log(data);
+						console.log("socket registered to backend",data);
 					})
 				}
 				this.setState({

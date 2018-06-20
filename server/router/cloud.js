@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-
+const User = require('../db/models/user')
 
 router.post("/updateBulb",(req,res)=>{
 	message.updateBulb({
@@ -46,4 +46,17 @@ router.get("/hum",(req,res)=>{
 		})
 })
 
+router.get("/onlineUsers",(req,res)=>{
+	User.find({ 'active': true }, "firstName lastName", (err, userList) => {
+		if (userList.length) {
+			userList = userList.map( (element) => {
+				let name = element["firstName"] +" "+ element["lastName"];
+				return name;
+			})
+			return res.json({ userList});
+			} else {
+				return res.json({ message: "No one seems to be online"});
+			}
+		})
+})
 module.exports = router;

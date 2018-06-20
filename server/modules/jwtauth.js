@@ -76,7 +76,8 @@ exports.authenticateWebClient = function authenticateWebClient(socket, data) {
 const loginDevice = function loginDevice(socket, device) {
     let profile = {
         uuid: device.uuid,
-        deviceName: device.deviceName
+        deviceName: device.deviceName,
+        clocking: device.clocking
     };
     let token = jwt.sign(profile, jwtSecret, {
         expiresIn: 360

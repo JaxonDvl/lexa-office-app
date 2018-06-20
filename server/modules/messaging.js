@@ -1,5 +1,6 @@
 const _ = require('lodash');
 const Device = require('../db/models/device')
+const User = require('../db/models/user')
 exports.broadcast = function (socket, data) {
     auth.verifyConnection(socket, data).then(function (result) {
         console.log('Access allowed to broadcast()');
@@ -15,71 +16,71 @@ exports.broadcast = function (socket, data) {
 
     }, function (err) {
         console.log('Access denied to broadcast()'); return;
-    }); 
+    });
 }
 
 exports.cloudMessageTemperature = function (data) {
     let temperature;
-    return new Promise(function(resolve,reject){
+    return new Promise(function (resolve, reject) {
         var obj = { message: data.message };
-        let selectedClient = _.find(clients, {uuid: "AX1"});
-        if(!selectedClient) {
+        let selectedClient = _.find(clients, { uuid: "AX1" });
+        if (!selectedClient) {
             reject(new Error("Could not find client."))
         }
-        selectedClient.emit('cloud-message-temperature', obj, function(dataAck){
+        selectedClient.emit('cloud-message-temperature', obj, function (dataAck) {
             temperature = dataAck
-            if(temperature) {
+            if (temperature) {
                 resolve(temperature)
             } else {
-                reject(new Error("Something went wrong on socket: "+ selectedClient.uuid))
+                reject(new Error("Something went wrong on socket: " + selectedClient.uuid))
             }
         })
     })
 }
 
-exports.changeClockState = function(data){
+exports.changeClockState = function (data) {
     console.log(data);
-    return new Promise(function(resolve,reject){
+    return new Promise(function (resolve, reject) {
         var obj = { state: data.state };
-        let selectedClient = _.find(clients, {uuid: "AX1"});
-        if(!selectedClient) {
+        let selectedClient = _.find(clients, { uuid: "AX1" });
+        if (!selectedClient) {
             reject(new Error("Could not find client."))
         }
-        selectedClient.emit('change-clocking', obj, function(dataAck){
-            if(dataAck) {
-                let selectedClients = _.filter(clients, (obj) => _.has(obj,'username')) || [];
-                if(selectedClients.length){
-                    _.each(selectedClients, (client)=>{
+        selectedClient.emit('change-clocking', obj, function (dataAck) {
+            if (dataAck) {
+                let selectedClients = _.filter(clients, (obj) => _.has(obj, 'username')) || [];
+                if (selectedClients.length) {
+                    _.each(selectedClients, (client) => {
                         client.emit('clocking-update', dataAck)
                     })
-            
+
                 }
-                Device.update({ uuid: "AX1" }, { $set: { clocking: dataAck.clocking }}, function (err, device){
-                    if(err) {
+                Device.update({ uuid: "AX1" }, { $set: { clocking: dataAck.clocking } }, function (err, device) {
+                    if (err) {
                         console.log(err);
                     }
                 });
                 resolve(dataAck)
             } else {
-                reject(new Error("Something went wrong on socket: "+ selectedClient.uuid))
+                reject(new Error("Something went wrong on socket: " + selectedClient.uuid))
             }
         })
     })
 }
 
-exports.updateBulb = function(data){
+exports.updateBulb = function (data) {
     console.log(data);
-    return new Promise(function(resolve,reject){
+    return new Promise(function (resolve, reject) {
         var obj = { data };
-        let selectedClient = _.find(clients, {uuid: "AX0"});
-        if(!selectedClient) {
+        let selectedClient = _.find(clients, { uuid: "AX0" });
+        if (!selectedClient) {
             reject(new Error("Could not find client."))
         }
-        selectedClient.emit('update-bulb', obj, function(dataAck){
-            if(dataAck) {
+        selectedClient.emit('update-bulb', obj, function (dataAck) {
+            if (dataAck) {
                 resolve(dataAck)
             } else {
-                reject(new Error("Something went wrong on socket: "+ selectedClient.uuid))
+                reject(new Error("Something went wrong on socket: " + selectedClient.uuid))
             }
         })
     })
@@ -88,12 +89,23 @@ exports.updateBulb = function(data){
 
 
 exports.broadcastTagToWebClients = function (data) {
-    console.log("data to be send", data);
-    let selectedClients = _.filter(clients, (obj) => _.has(obj,'username')) || [];
-    if(selectedClients.length){
-        _.each(selectedClients, (client)=>{
-            client.emit('tag-register', data)
+    console.log("data to be send", data.tagId);
+    let selectedClients = _.filter(clients, (obj) => _.has(obj, 'username')) || [];
+
+    if (selectedClients.length) {
+        User.findOne({ 'tagId': data.tagId }, (err, userMatch) => {
+            
+            if (userMatch) {
+                _.each(selectedClients, (client) => {
+                    client.emit('tag-register', {registrable: false, message : `TAGID in use assigned to ${userMatch.username}`})
+                })
+            } else {
+                _.each(selectedClients, (client) => {
+                    client.emit('tag-register', data)
+                })
+            }
         })
+      
 
     } else {
 
@@ -103,15 +115,15 @@ exports.broadcastTagToWebClients = function (data) {
 
 exports.cloudMessageHumidity = function (data) {
     let humidity;
-    return new Promise(function(resolve,reject){
+    return new Promise(function (resolve, reject) {
         var obj = { message: data.message };
-        let selectedClient = _.find(clients, {uuid: "AX1"});
-        selectedClient.emit('cloud-message-humidity', obj, function(dataAck){
+        let selectedClient = _.find(clients, { uuid: "AX1" });
+        selectedClient.emit('cloud-message-humidity', obj, function (dataAck) {
             humidity = dataAck
-            if(humidity) {
+            if (humidity) {
                 resolve(humidity)
             } else {
-                reject(new Error("Something went wrong on socket: "+ selectedClient.uuid))
+                reject(new Error("Something went wrong on socket: " + selectedClient.uuid))
             }
         })
     })

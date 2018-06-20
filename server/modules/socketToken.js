@@ -1,5 +1,6 @@
 
 const socketio = require('socket.io');
+const _ = require('lodash');
 let clients = {};
 global.clients = clients;
 
@@ -35,7 +36,6 @@ exports.connect =  function(server) {
         })
 
         socket.on('data-tag', function(data){
-            // console.log(data);
             message.broadcastTagToWebClients(data);
         })
         socket.on('data-log', function(data){
@@ -44,11 +44,10 @@ exports.connect =  function(server) {
                 if(userMatch){
                 let checkInState =  "Check In";
                 Logs.find({tagId:data.tagId}, (err, logsMatch)=> {
-                    if(logsMatch.length !== 0) {
-                        console.log( "this was upper",logsMatch);                        
+                    if(logsMatch.length !== 0) {                        
                         if(logsMatch[logsMatch.length -1].state === checkInState){
                             checkInState = "Check Out";
-                            console.log( "this was matched",logsMatch[logsMatch.length -1]);
+                            
                         }
                     } 
                     const newLog = new Logs({
@@ -58,10 +57,23 @@ exports.connect =  function(server) {
                         'state' :checkInState,
                         'data' : Date.now()
                     });
+                    let activeState = checkInState === "Check In" ? true: false;
+                        User.update({ tagId: data.tagId}, { $set: { active: activeState } }, function (err, user) {
+                            if (err) {
+                                console.log(err);
+                            }
+                        });
                     newLog.save((err, savedLog) => {
                         if (err) console.log(err);
-                        else console.log(savedLog);
+                       ;
                     })
+                    let selectedClients = _.filter(clients, (obj) => _.has(obj, 'username')) || [];
+                    if (selectedClients.length) {
+                        _.each(selectedClients, (client) => {
+                            client.emit('clocking-data-log', {data:"got logs"})
+                        })
+    
+                    }
                 })
             } else {
                 console.log("user not found,tagID is free");

@@ -3,7 +3,6 @@ const Schema = mongoose.Schema
 const bcrypt = require('bcryptjs')
 mongoose.promise = Promise
 
-
 const userSchema = new Schema({
 	firstName: { type: String, unique: false },
 	lastName: { type: String, unique: false },
@@ -14,7 +13,6 @@ const userSchema = new Schema({
 
 })
 
-
 userSchema.methods = {
 	checkPassword: function (inputPassword) {
 		return bcrypt.compareSync(inputPassword, this.password)
@@ -23,7 +21,6 @@ userSchema.methods = {
 		return bcrypt.hashSync(plainTextPassword, 10)
 	}
 }
-
 
 userSchema.pre('save', function (next) {
 	if (!this.password) {

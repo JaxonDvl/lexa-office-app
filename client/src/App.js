@@ -10,7 +10,7 @@ import Navigation from './Navigation'
 import Report from './components/Report';
 import PrivateRoute from './components/PrivateRoute';
 
-import {serverUrl} from './helpers/constants';
+import { serverUrl } from './helpers/constants';
 import socketClient from "socket.io-client";
 class App extends Component {
 	constructor() {
@@ -19,8 +19,8 @@ class App extends Component {
 			loggedIn: false,
 			user: null,
 			loading: true,
-			socket : null,
-			serverUrl : serverUrl
+			socket: null,
+			serverUrl: serverUrl
 		}
 		this._logout = this._logout.bind(this)
 		this._login = this._login.bind(this)
@@ -31,13 +31,13 @@ class App extends Component {
 
 			console.log(response.data)
 			if (!!response.data.user) {
-				if(!socket){
+				if (!socket) {
 					socket = socketClient(serverUrl);
 					socket.clientConnUser = response.data.user.username;
-					socket.emit('login-web', {username:socket.clientConnUser});
+					socket.emit('login-web', { username: socket.clientConnUser });
 					console.log('User logged in');
-					socket.on('login-client.success', function(data){
-						console.log("socket registered to backend",data);
+					socket.on('login-client.success', function (data) {
+						console.log("socket registered to backend", data);
 					})
 				}
 				this.setState({
@@ -58,7 +58,7 @@ class App extends Component {
 	componentWillUnmount() {
 		console.log("called unmount");
 		this.state.socket.emit("logout");
-	  }
+	}
 
 	_logout(event) {
 		event.preventDefault()
@@ -70,7 +70,7 @@ class App extends Component {
 				this.setState({
 					loggedIn: false,
 					user: null,
-					socket:null
+					socket: null
 				})
 			}
 		})
@@ -87,12 +87,12 @@ class App extends Component {
 				console.log(response)
 				if (response.status === 200) {
 					// update the state
-					if(!socket){
+					if (!socket) {
 						socket = socketClient(serverUrl);
 						socket.clientConnUser = response.data.user.username;
-						socket.emit('login-web', {username:socket.clientConnUser});
+						socket.emit('login-web', { username: socket.clientConnUser });
 						console.log('User logged in');
-						socket.on('login-client.success', function(data){
+						socket.on('login-client.success', function (data) {
 							console.log(data);
 						})
 					}
@@ -106,17 +106,17 @@ class App extends Component {
 	}
 
 	render() {
-		if(this.state.loading){
+		if (this.state.loading) {
 			return (<div></div>)
 		}
 		return (
 			<div className="App">
 				<Navigation _logout={this._logout} loggedIn={this.state.loggedIn} />
 				<Switch>
-				<Route exact path="/" render={() => <Home user={this.state.user} />} />
-				<Route exact path="/login" render={() => <LoginForm _login={this._login} />}/>
-				<PrivateRoute authenticated={this.state.loggedIn} exact socket={this.state.socket} path="/signup" component={SignupForm} />
-				<PrivateRoute   authenticated={this.state.loggedIn} exact socket={this.state.socket} user={this.state.user} path="/reports" component={Report} />
+					<Route exact path="/" render={() => <Home user={this.state.user} />} />
+					<Route exact path="/login" render={() => <LoginForm _login={this._login} />} />
+					<PrivateRoute authenticated={this.state.loggedIn} exact socket={this.state.socket} path="/signup" component={SignupForm} />
+					<PrivateRoute authenticated={this.state.loggedIn} exact socket={this.state.socket} user={this.state.user} path="/reports" component={Report} />
 				</Switch>
 			</div>
 		)

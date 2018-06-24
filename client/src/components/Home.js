@@ -6,7 +6,6 @@ class Home extends Component {
 	}
 
 	handleSendRequest = () => {
-		console.log("sending request");
 		axios.get('/device/deviceInfo')
 			.then(response => {
 				console.log(response);
@@ -16,15 +15,16 @@ class Home extends Component {
 	render() {
 		return (
 			<div>
-
 				<div className="Home">
 					<p>Current User:</p>
 					<code>
-						{JSON.stringify(  this.props.user)}
+						{JSON.stringify(this.props.user)}
 					</code>
 				</div>
 				<div>
-					<button className="btn btn-primary req-test" onClick={this.handleSendRequest}>Send Request</button>
+					<button className="btn btn-primary req-test"
+						onClick={this.handleSendRequest}>
+						Send Request</button>
 				</div>
 			</div>
 		)
